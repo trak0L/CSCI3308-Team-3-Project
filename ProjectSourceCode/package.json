@@ -1,7 +1,8 @@
 {
   "name": "node-ejs",
-  "main": "index.js",
+  "main": "src/index.js",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "ejs": "^2.5.5",
     "ejs-lint": "^0.3.0",
     "body-parser": "^1.20.0",
@@ -12,6 +13,6 @@
   },
   "scripts": {
     "prestart": "npm install",
-    "start": "node index.js"
+    "start": "node ."
   }
 }

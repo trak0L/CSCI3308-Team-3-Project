@@ -1,5 +1,6 @@
 // ----------------------------------   DEPENDENCIES  ----------------------------------------------
 const express = require('express');
+const bcrypt = require('bcrypt');
 const app = express();
 const handlebars = require('express-handlebars');
 const path = require('path');
@@ -104,8 +105,6 @@ app.get('/logout', (req, res) => {
 });
 
 // register.hbs Routing
-
-const bcrypt = require('bcrypt'); // npm install bcrypt
 
 app.get('/register', (req, res) => {
   res.render('pages/register');

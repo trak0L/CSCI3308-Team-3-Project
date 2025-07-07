@@ -7,19 +7,22 @@ services:
     volumes:
       - group-project:/var/lib/postgresql/data
       - ./src/init_data:/docker-entrypoint-initdb.d
+
   web:
-    image: node:lts
-    user: 'node'
-    working_dir: /home/node/app
+    build:
+      context: .
+      dockerfile: DockerFile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    volumes:
+      - .:/home/node/app
     env_file: .env
     environment:
       - NODE_ENV=development
-    depends_on:
-      - db
-    ports:
-      - '3000:3000'
-    volumes:
-      - ./:/home/node/app
-    command: 'npm start'
+    working_dir: /home/node/app/src
+    command: "npm start"
+
 volumes:
   group-project:

@@ -1,18 +1,3 @@
-INSERT INTO users
-  (first_name, last_name, email)
+INSERT INTO "Users" (username, email)
 VALUES
-  (
-    'Janek',
-    'Andrich',
-    'jandrich0@colorado.edu'
-  ),
-  (
-    'Geri',
-    'Haslock',
-    'ghaslock1@colorado.edu'
-  ),
-  (
-    'Ewen',
-    'Deetlefs',
-    'edeetlefs2@colorado.edu'
-  );
+  ('Janek', 'jandrich0@colorado.edu');
