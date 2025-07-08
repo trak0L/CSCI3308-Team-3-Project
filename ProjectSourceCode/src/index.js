@@ -144,7 +144,7 @@ app.use(auth);
 
 app.get('/', (req, res) => {
   res.render('pages/home', {
-//TODO: homepage code
+    
   });
 });
 
