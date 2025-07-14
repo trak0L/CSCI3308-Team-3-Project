@@ -1,8 +1,29 @@
+/* TODO:
+- Need landing page
+- Need to work on nav bar to have login/register
+- Need to have main posts page
+  - This will need the auth middleware
+    // Authentication Middleware.
+    const auth = (req, res, next) => {
+      if (!req.session.user) {
+        // Default to login page.
+        return res.redirect('/login');
+      }
+      next();
+    };
+
+    // Authentication Required
+    app.use(auth);
+
+
+*/
+
 // ----------------------------------   DEPENDENCIES  ----------------------------------------------
 const express = require('express');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs'); //  To hash passwords
 const app = express();
 const handlebars = require('express-handlebars');
+const Handlebars = require('handlebars');
 const path = require('path');
 const pgp = require('pg-promise')();
 const bodyParser = require('body-parser');
@@ -57,90 +78,6 @@ db.connect()
     console.log('ERROR', error.message || error);
   });
 
-// -------------------------------------  ROUTES for login.hbs   ----------------------------------------------
-const user = {
-  user_id: undefined,
-  username: undefined,
-  email: undefined,
-  password_hash: undefined,
-  icon_url: undefined,
-  privilege: undefined,
-};
-
-// const posts = `
-//   SELECT DISTINCT
-//     posts.post_id,
-//     posts.post_title,
-//     posts.posts_,
-//     students.student_id = $1 AS "taken"
-//   FROM
-//     courses
-//     JOIN student_courses ON courses.course_id = student_courses.course_id
-//     JOIN students ON student_courses.student_id = students.student_id
-//   WHERE students.student_id = $1
-//   ORDER BY courses.course_id ASC;`;
-
-// const all_courses = `
-//   SELECT
-//     courses.course_id,
-//     courses.course_name,
-//     courses.credit_hours,
-//     CASE
-//     WHEN
-//     courses.course_id IN (
-//       SELECT student_courses.course_id
-//       FROM student_courses
-//       WHERE student_courses.student_id = $1
-//     ) THEN TRUE
-//     ELSE FALSE
-//     END
-//     AS "taken"
-//   FROM
-//     courses
-//   ORDER BY courses.course_id ASC;
-//   `;
-
-app.get('/login', (req, res) => {
-  res.render('pages/login');
-});
-
-// Login submission
-app.post('/login', (req, res) => {
-  const email = req.body.email;
-  const username = req.body.username;
-  const query = 'select * from users where users.email = $1 LIMIT 1';
-  const values = [email];
-
-  // get the student_id based on the emailid
-  db.one(query, values)
-    .then(data => {
-      user.user_id = data.user_id;
-      user.username = username;
-      user.email = data.email;
-      user.icon_url = data.icon_url;
-      user.password_hash = data.password_hash;
-
-      req.session.user = user;
-      req.session.save();
-
-      res.redirect('/');
-    })
-    .catch(err => {
-      console.log(err);
-      res.redirect('/login');
-    });
-});
-
-// Authentication middleware.
-const auth = (req, res, next) => {
-  if (!req.session.user) {
-    return res.redirect('/login');
-  }
-  next();
-};
-
-app.use(auth);
-
 // -------------------------------------  ROUTES for home.hbs   ----------------------------------------------
 
 app.get('/', (req, res) => {
@@ -149,6 +86,81 @@ app.get('/', (req, res) => {
   });
 });
 
+// -------------------------------------  ROUTES for register.hbs   ----------------------------------------------
+
+// Load the register page
+app.get('/register', (req, res) => {
+  res.render('pages/register');  
+});
+
+// take what the user is inputing
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body; // take in the input
+
+  try {
+    // Check if user already exists
+    const exists = await db.any('SELECT * FROM users WHERE username = $1', [username]);
+    if (exists.length > 0) {
+      return res.status(400).render('pages/register', {
+        message: 'Username already exists'
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const query = `
+      INSERT INTO users (username, password_hash)
+      VALUES ($1, $2)
+      RETURNING *`;
+    const newUser = await db.one(query, [username, hashedPassword]);
+
+    res.redirect('/login');
+  } catch (err) {
+    console.error('Registration failed:', err.message);
+    return res.status(500).render('pages/register', {
+      message: 'An unexpected error occurred'
+    });
+  }
+});
+
+
+// -------------------------------------  ROUTES for login.hbs   ----------------------------------------------
+const user = {
+  password: undefined,
+  username: undefined,
+};
+
+app.get('/login', (req, res) => {
+  res.render('pages/login');
+});
+
+// Login submission
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+  const query = 'SELECT * FROM users WHERE username = $1 LIMIT 1';
+
+  // Check the db for the username and password
+  db.one(query, [username])
+    .then(user => {
+      return bcrypt.compare(password, user.password)
+        .then(match => {
+          if (!match) throw new Error('Invalid password');
+
+          req.session.user = user;
+          req.session.save();
+          res.redirect('/discover');
+        });
+    })
+    .catch(err => {
+      console.error('Login failed:', err.message);
+      res.status(401).render('pages/login', {
+        message: 'Login failed: ' + err.message
+      });
+    });
+});
+
+
+
 // -------------------------------------  ROUTES for logout.hbs   ----------------------------------------------
 
 app.get('/logout', (req, res) => {
@@ -156,39 +168,6 @@ app.get('/logout', (req, res) => {
     res.render('pages/logout');
   });
 });
-
-// register.hbs Routing
-
-app.get('/register', (req, res) => {
-  res.render('pages/register');
-});
-
-app.post('/register', async (req, res) => {
-  const { first_name, last_name, email, password } = req.body;
-
-  try {
-    const hashed = await bcrypt.hash(password, 12);
-    const query = `
-      INSERT INTO students (first_name, last_name, email, password_hash)
-      VALUES ($1, $2, $3, $4)
-      RETURNING user_id
-    `;
-    const result = await db.one(query, [first_name, last_name, email, hashed]);
-
-    req.session.user = {
-      user_id: result.user_id,
-      first_name,
-      last_name,
-      email,
-    };
-
-    res.redirect('/');
-  } catch (err) {
-    console.error(err);
-    res.render('pages/register', { error: 'Registration failed. Try again.' });
-  }
-});
-
 
 // -------------------------------------  START THE SERVER   ----------------------------------------------
 
