@@ -131,14 +131,14 @@ app.post('/login', (req, res) => {
 });
 
 // Authentication middleware.
-const auth = (req, res, next) => {
+const log_auth = (req, res, next) => {
   if (!req.session.user) {
     return res.redirect('/login');
   }
   next();
 };
 
-app.use(auth);
+app.use('/login', log_auth);
 
 // -------------------------------------  ROUTES for home.hbs   ----------------------------------------------
 
@@ -155,6 +155,82 @@ app.get('/logout', (req, res) => {
     res.render('pages/logout');
   });
 });
+
+// -------------------------------------  ROUTES for register.hbs   ----------------------------------------------
+
+// const posts = `
+//   SELECT DISTINCT
+//     posts.post_id,
+//     posts.post_title,
+//     posts.posts_,
+//     students.student_id = $1 AS "taken"
+//   FROM
+//     courses
+//     JOIN student_courses ON courses.course_id = student_courses.course_id
+//     JOIN students ON student_courses.student_id = students.student_id
+//   WHERE students.student_id = $1
+//   ORDER BY courses.course_id ASC;`;
+
+// const all_courses = `
+//   SELECT
+//     courses.course_id,
+//     courses.course_name,
+//     courses.credit_hours,
+//     CASE
+//     WHEN
+//     courses.course_id IN (
+//       SELECT student_courses.course_id
+//       FROM student_courses
+//       WHERE student_courses.student_id = $1
+//     ) THEN TRUE
+//     ELSE FALSE
+//     END
+//     AS "taken"
+//   FROM
+//     courses
+//   ORDER BY courses.course_id ASC;
+//   `;
+
+app.get('/register', (req, res) => {
+  res.render('pages/register');
+});
+
+// Register submission
+app.post('/register', (req, res) => {
+  const email = req.body.email;
+  const username = req.body.username;
+  const query = 'select * from users where users.email = $1 LIMIT 1';
+  const values = [email];
+
+  // get the student_id based on the emailid
+  db.one(query, values)
+    .then(data => {
+      user.user_id = data.user_id;
+      user.username = username;
+      user.email = data.email;
+      user.icon_url = data.icon_url;
+      user.password_hash = data.password_hash;
+
+      req.session.user = user;
+      req.session.save();
+
+      res.redirect('/');
+    })
+    .catch(err => {
+      console.log(err);
+      res.redirect('/register');
+    });
+});
+
+// Authentication middleware.
+const reg_auth = (req, res, next) => {
+  if (!req.session.user) {
+    return res.redirect('/register');
+  }
+  next();
+};
+
+app.use('/register', reg_auth);
 
 // -------------------------------------  START THE SERVER   ----------------------------------------------
 
