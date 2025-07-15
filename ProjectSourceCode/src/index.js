@@ -78,12 +78,21 @@ db.connect()
     console.log('ERROR', error.message || error);
   });
 
-// -------------------------------------  ROUTES for home.hbs   ----------------------------------------------
+// TODO - Include your API routes here
+
+// -------------------------------------  ROUTES for landing page   ----------------------------------------------
 
 app.get('/', (req, res) => {
-  res.render('pages/home', {
-    
-  });
+  const logged = req.session && req.session.user;
+  res.render('pages/home', { logged });
+});
+
+
+// -------------------------------------  ROUTES for home page   ----------------------------------------------
+
+app.get('/home', (req, res) => {
+  const logged = req.session && req.session.user;
+  res.render('pages/home', { logged });
 });
 
 // -------------------------------------  ROUTES for register.hbs   ----------------------------------------------
@@ -93,27 +102,43 @@ app.get('/register', (req, res) => {
   res.render('pages/register');  
 });
 
-// take what the user is inputing
+// Take the user input and add it as a user
 app.post('/register', async (req, res) => {
-  const { username, password } = req.body; // take in the input
+  console.log('[DEBUG] Register hit:', req.body);
+  // Take the information and check if the passwords are the same
+  const { username, email, password, confirmPassword } = req.body;
+  if (password !== confirmPassword) {
+    return res.status(400).render('pages/register', {
+      message: 'Passwords do not match'
+    });
+  }
 
   try {
+    // Take the import to compare
+    const exists = await db.any(
+      'SELECT * FROM users WHERE username = $1 OR email = $2',
+      [username, email]
+    );
+
     // Check if user already exists
-    const exists = await db.any('SELECT * FROM users WHERE username = $1', [username]);
     if (exists.length > 0) {
       return res.status(400).render('pages/register', {
-        message: 'Username already exists'
+        message: 'Username/Email already exists'
       });
     }
 
+    // Wait to hash the password 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Insert into DB if not in DB
     const query = `
-      INSERT INTO users (username, password_hash)
-      VALUES ($1, $2)
+      INSERT INTO users (username, email, password_hash)
+      VALUES ($1, $2, $3)
       RETURNING *`;
-    const newUser = await db.one(query, [username, hashedPassword]);
-
+    const newUser = await db.one(query, [username, email, hashedPassword]);
+    
+    // Send user to login
+    // TODO: Add a message to prompt user to login with new credentials
     res.redirect('/login');
   } catch (err) {
     console.error('Registration failed:', err.message);
@@ -125,11 +150,14 @@ app.post('/register', async (req, res) => {
 
 
 // -------------------------------------  ROUTES for login.hbs   ----------------------------------------------
+
+// Initializers
 const user = {
   password: undefined,
   username: undefined,
 };
 
+// Load page
 app.get('/login', (req, res) => {
   res.render('pages/login');
 });
@@ -139,16 +167,16 @@ app.post('/login', (req, res) => {
   const { username, password } = req.body;
   const query = 'SELECT * FROM users WHERE username = $1 LIMIT 1';
 
-  // Check the db for the username and password
+  // Check for correct info then redirect to correct page
   db.one(query, [username])
     .then(user => {
-      return bcrypt.compare(password, user.password)
+      return bcrypt.compare(password, user.password_hash)
         .then(match => {
           if (!match) throw new Error('Invalid password');
 
           req.session.user = user;
           req.session.save();
-          res.redirect('/discover');
+          res.redirect('/home');
         });
     })
     .catch(err => {

@@ -7,23 +7,51 @@
 </head>
 <body class="bg-light">
   <div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
-    <form method="POST" action="/register" class="w-100" style="max-width: 400px;">
+    <form method="POST" action="/register" class="w-100" style="max-width: 400px;" onsubmit="return validatePasswords()">
       <h2 class="mb-3 text-center">Register</h2>
 
+      <!-- Username -->
       <div class="mb-3">
         <input type="text" class="form-control" name="username" placeholder="Enter Username" required />
       </div>
 
+      <!-- Email -->
       <div class="mb-3">
-        <input type="password" class="form-control" name="password" placeholder="Enter Password" required />
+        <input type="email" class="form-control" name="email" placeholder="Enter Email" required />
       </div>
 
+      <!-- Password -->
+      <div class="mb-3">
+        <input type="password" class="form-control" id="password" name="password" placeholder="Enter Password" required />
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="mb-3">
+        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Retype Password" required />
+      </div>
+
+      <!-- Submit -->
       <button type="submit" class="btn btn-primary w-100">Register</button>
+
+      <!-- Login Redirect -->
       <p class="text-center mt-3">
         Already have an account?
         <a href="/login">Log in here</a>
       </p>
     </form>
   </div>
+
+  <!-- Password Matching Validation Script -->
+  <script>
+    function validatePasswords() {
+      const pw = document.getElementById('password').value;
+      const confirm = document.getElementById('confirmPassword').value;
+      if (pw !== confirm) {
+        alert('Passwords do not match.');
+        return false;
+      }
+      return true;
+    }
+  </script>
 </body>
 </html>
