@@ -11,3 +11,15 @@
  *   getPostsByBoard(boardId)
  *   getPostById(postId)
  */
+
+import db from '../db.js';
+
+export async function createPost({ board_id, user_id, title }) {
+    const { rows } = await db.query(
+      `INSERT INTO posts (board_id, user_id, title)
+       VALUES ($1, $2, $3)
+       RETURNING post_id, board_id, user_id, title, created_at`,
+      [board_id, user_id, title]
+    );
+    return rows[0];
+  }
