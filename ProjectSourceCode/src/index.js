@@ -107,7 +107,7 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const username = req.body.username;
-  const query = 'select * from users where users.email = $1 LIMIT 1';
+  const query = 'select * from users where email = $1 LIMIT 1';
   const values = [email];
 
   // get the student_id based on the emailid
@@ -119,10 +119,10 @@ app.post('/login', (req, res) => {
       user.icon_url = data.icon_url;
       user.password_hash = data.password_hash;
 
-      req.session.user = user;
+      req.session.user = user;  
       req.session.save();
 
-      res.redirect('/');
+      res.redirect('/home');
     })
     .catch(err => {
       console.log(err);
@@ -139,6 +139,11 @@ const log_auth = (req, res, next) => {
 };
 
 app.use('/login', log_auth);
+app.use('/home', log_auth);
+app.use('/logout', log_auth);
+app.use('/settings', log_auth);
+app.use('/thread', log_auth);
+app.use('/new_thread', log_auth);
 
 // -------------------------------------  ROUTES for home.hbs   ----------------------------------------------
 
@@ -214,7 +219,7 @@ app.post('/register', (req, res) => {
       req.session.user = user;
       req.session.save();
 
-      res.redirect('/');
+      res.redirect('/home');
     })
     .catch(err => {
       console.log(err);
