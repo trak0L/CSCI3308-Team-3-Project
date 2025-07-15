@@ -1,23 +1,40 @@
 <header>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
-      <a class="navbar-brand" href="/"></a>
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item">
-            <a class="nav-link" href = '/home'>Home</a>
-        <li class="nav-item">
-          <a class="nav-link" href='/logout'>Log out</a>
-        </li>
-      </ul>
-    </div>
+  <nav class="navbar navbar-expand-sm border-bottom">
+    <div class="container">
+      <button
+        class="navbar-toggler ms-auto"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbar-collapse"
+        aria-controls="navbar"
+        aria-expanded="false"
+        aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-    <div class="navbar-collapse collapse order-3 dual-collapse2">
-      <ul class="navbar-nav ml-auto">
+      <div class="collapse navbar-collapse" id="navbar-collapse">
+        <ul class="navbar-nav me-auto">
           <li class="nav-item">
-        </li>
-            <a class="nav-link" href = '/settings'>Settings</a>
-        </li>
-      </ul>
+            <a class="nav-link" href="/home">Home</a>
+          </li>
+        </ul>
+
+        <!-- Conditional Login/Logout/Posts -->
+        <ul class="navbar-nav">
+          {{#if logged}}
+            <li class="nav-item me-2">
+              <a class="nav-link" href="/posts">Posts</a>
+            </li>
+            <li class="nav-item me-1">
+              <a class="nav-link" href="/logout">Logout</a>
+            </li>
+          {{else}}
+            <li class="nav-item me-1">
+              <a class="nav-link" href="/login">Login</a>
+            </li>
+          {{/if}}
+        </ul>
+      </div>
     </div>
   </nav>
 </header>

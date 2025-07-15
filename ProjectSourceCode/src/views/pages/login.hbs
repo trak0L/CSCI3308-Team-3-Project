@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <main>
   <div>
     <form action="/login" method="POST">
@@ -10,3 +11,32 @@
         </p>
   </div>
 </main>
+=======
+{{> message}}
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login</title>
+</head>
+<body class="bg-light">
+  <div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
+    <form method="POST" action="/login" class="w-100" style="max-width: 400px;">
+        <h2 class="mb-3 text-center">Login</h2>
+
+    <div class="mb-3">
+        <input type="text" class="form-control" name="username" placeholder="Enter Username" required />
+    </div>
+    <div class="mb-3">
+        <input type="password" class="form-control" name="password" placeholder="Enter Password" required />
+    </div>
+        <button type="submit" class="btn btn-primary w-100">Login</button>
+        <p class="text-center mt-3">
+            Don't have an account?
+            <a href="/register">Register here</a>
+        </p>
+    </form>
+  </div>
+</body>
+</html>
+>>>>>>> main
