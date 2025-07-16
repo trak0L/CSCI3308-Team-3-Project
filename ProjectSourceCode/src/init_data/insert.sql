@@ -16,7 +16,9 @@ VALUES
 --   this creates the first discussion in board_id=1 by user_id=1
 INSERT INTO posts (board_id, user_id, title)
 VALUES
-  (1, 1, 'welcome to the forum')
+  (1, 1, 'welcome to the forum'),
+  (2, 1, 'welcome to the forum'),
+  (3, 1, 'welcome to the forum')
 ;
 
 -- 4) seed a comment

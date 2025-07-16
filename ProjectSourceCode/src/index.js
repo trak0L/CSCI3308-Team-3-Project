@@ -120,8 +120,7 @@ app.get('/home', (req, res) => {
     })
     .catch(err => {
       res.render('pages/home', {
-        courses: [],
-        email: user.email,
+        boards: [],
         error: true,
         message: err.message,
       });
@@ -226,9 +225,69 @@ app.get('/logout', (req, res) => {
 
 // -------------------------------------  ROUTES for boards page   ----------------------------------------------
 
+const board_posts = `
+  SELECT
+  *    
+  FROM
+  posts
+  WHERE
+  board_id = $1
+  ORDER BY post_id DESC;`;
+
 app.get('/board', (req, res) => {
-  
+  const board_id = req.query.board_id;
+  db.one('SELECT name, description FROM boards WHERE board_id = $1 LIMIT 1;', [board_id]).then(board=>{
+  db.any(board_posts, [board_id])
+    .then(posts =>{
+      console.log(posts);
+      res.render('pages/board', {
+        title: board.name,
+        description: board.description,
+        posts
+      });
+    })
+    .catch(err => {
+      res.render('pages/board', {
+        posts: [],
+        error: true,
+        message: err.message,
+      });
+    });
+  });
 });
+
+// -------------------------------------  ROUTES for threads page   ----------------------------------------------
+
+const thread_comments = `
+  SELECT
+  *    
+  FROM
+  comments
+  WHERE
+  post_id = $1
+  ORDER BY comment_id DESC;`;
+
+app.get('/thread', (req, res) => {
+  const post_id = req.query.thread_id;
+  db.one('SELECT title FROM posts WHERE post_id = $1 LIMIT 1;', [post_id]).then(post=>{
+  db.any(thread_comments, [post_id])
+    .then(comments =>{
+      console.log(comments);
+      res.render('pages/thread', {
+        title: post.title,
+        comments
+      });
+    })
+    .catch(err => {
+      res.render('pages/thread', {
+        posts: [],
+        error: true,
+        message: err.message,
+      });
+    });
+  });
+});
+
 // -------------------------------------  START THE SERVER   ----------------------------------------------
 
 app.listen(3000);

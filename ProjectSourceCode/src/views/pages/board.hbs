@@ -2,15 +2,22 @@
   <div class="container d-flex justify-content-left align-items-left">
     <div class="list-group list-group-flush">
       <div class="list-group-item">
-        <h1>Threads</h1>
+        <h1>{{title}}</h1>
+        <h5>{{description}}</h5>
       </div>
-    {{#each threads}}
-        <a href="#" class="list-group-item list-groupp-item-action">
+    {{#each posts}}
+        <a id={{post_id}} href="#" class="list-group-item list-group-item-action">
           <div class="d-flex w-100 justify-content-between">
-            <h5 class="mb-1">{{name}}</h5>
+            <h5 class="mb-1">{{title}}</h5>
           </div>
-          <p class="mb-1">{{description}}</p>
+          <p class="mb-1">Posted: {{created_at}}</p>
         </a>
+        <script type="text/javascript">
+          var thread_path = "/thread?thread_id=";
+          var link = document.getElementById({{post_id}});
+          var id = {{post_id}};
+          link.href = thread_path+id;
+        </script>
     {{/each}}
     </div>
   </div>
