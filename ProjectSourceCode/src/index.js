@@ -256,6 +256,23 @@ app.get('/board', (req, res) => {
   });
 });
 
+app.post('/board', async (req,res) =>{
+  try {
+  const {board_name, board_description} = req.body;
+  const query = `
+  INSERT INTO boards 
+  (name, description) 
+  VALUES ($1, $2) RETURNING *;`;
+  const newBoard = await db.one(query, [board_name, board_description]);
+  res.redirect('/home');}
+  catch (err) {
+    console.error('Board Cation failed:', err.message);
+    return res.status(500).render('pages/home', {
+      message: 'An unexpected error occurred'
+    });
+  }
+});
+
 // -------------------------------------  ROUTES for threads page   ----------------------------------------------
 
 const thread_comments = `
@@ -286,6 +303,23 @@ app.get('/thread', (req, res) => {
       });
     });
   });
+});
+
+app.post('/board', async (req,res) =>{
+  try {
+  const {post_title, user_id, board_id} = req.body;
+  const query = `
+  INSERT INTO threads 
+  (board_id, user_id, post_title) 
+  VALUES ($1, $2, $3) RETURNING *;`;
+  const newBoard = await db.one(query, [board_id, user_id, post_title]);
+  res.redirect('/home');}
+  catch (err) {
+    console.error('Board Cation failed:', err.message);
+    return res.status(500).render('pages/home', {
+      message: 'An unexpected error occurred'
+    });
+  }
 });
 
 // -------------------------------------  START THE SERVER   ----------------------------------------------

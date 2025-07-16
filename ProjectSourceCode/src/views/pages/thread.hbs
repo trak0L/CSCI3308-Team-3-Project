@@ -12,6 +12,18 @@
           <p class="mb-1">Posted: {{created_at}}</p>
         </a>
     {{/each}}
+    <div class="list-group-item">
+        <form method="POST" action="/board" class="w-100" style="max-width: 400px;">
+          <h3 class="mb-3 text-left">New Post</h3>
+          <div class="mb-3">
+            <input type="text" class="form-control" name="post_title" placeholder="Enter Post Title" required />
+          </div>
+          <div class="mb-3">
+            <input type="hidden" class="form-control" name="board_id" required />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Create Board</button>
+        </form>
+      </div>
     </div>
   </div>
 </main>

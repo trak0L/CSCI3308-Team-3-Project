@@ -18,6 +18,18 @@
           link.href = posts_path+id;
         </script>
     {{/each}}
+      <div class="list-group-item">
+        <form method="POST" action="/board" class="w-100" style="max-width: 400px;">
+          <h3 class="mb-3 text-left">New Board</h3>
+          <div class="mb-3">
+            <input type="text" class="form-control" name="board_name" placeholder="Enter Board Title" required />
+          </div>
+          <div class="mb-3">
+            <input type="text" class="form-control" name="board_description" placeholder="Enter Board Description" required />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Create Board</button>
+        </form>
+      </div>
     </div>
   </div>
 </main>
