@@ -28,6 +28,7 @@ const path = require('path');
 const pgp = require('pg-promise')();
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const { permission } = require('process');
 
 // -------------------------------------  APP CONFIG   ----------------------------------------------
 
@@ -82,6 +83,8 @@ db.connect()
 
 // -------------------------------------  ROUTES for landing page   ----------------------------------------------
 
+
+
 app.get('/', (req, res) => {
   const logged = req.session && req.session.user;
   res.render('pages/home', { logged });
@@ -90,9 +93,39 @@ app.get('/', (req, res) => {
 
 // -------------------------------------  ROUTES for home page   ----------------------------------------------
 
+// Initializers
+const user = {
+  password: undefined,
+  username: undefined,
+  user_id: undefined,
+  email: undefined,
+  permission: undefined,
+};
+
+const boards = `
+  SELECT
+  *    
+  FROM
+  boards
+  ORDER BY board_id DESC;`;
+
 app.get('/home', (req, res) => {
-  const logged = req.session && req.session.user;
-  res.render('pages/home', { logged });
+
+  db.any(boards)
+    .then(boards => {
+      console.log(boards);
+      res.render('pages/home', {
+        boards
+      }); 
+    })
+    .catch(err => {
+      res.render('pages/home', {
+        courses: [],
+        email: user.email,
+        error: true,
+        message: err.message,
+      });
+    });
 });
 
 // -------------------------------------  ROUTES for register.hbs   ----------------------------------------------
@@ -151,12 +184,6 @@ app.post('/register', async (req, res) => {
 
 // -------------------------------------  ROUTES for login.hbs   ----------------------------------------------
 
-// Initializers
-const user = {
-  password: undefined,
-  username: undefined,
-};
-
 // Load page
 app.get('/login', (req, res) => {
   res.render('pages/login');
@@ -197,6 +224,11 @@ app.get('/logout', (req, res) => {
   });
 });
 
+// -------------------------------------  ROUTES for boards page   ----------------------------------------------
+
+app.get('/board', (req, res) => {
+  
+});
 // -------------------------------------  START THE SERVER   ----------------------------------------------
 
 app.listen(3000);
