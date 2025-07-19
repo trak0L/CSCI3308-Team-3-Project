@@ -175,8 +175,8 @@ app.post('/login', (req, res) => {
         .then(match => {
           if (!match) throw new Error('Invalid password');
 
-          req.session.user = user;
-          req.session.save();
+          req.session.user = user; // save the specific sestion
+          req.session.save(); // create a recognizable session
           res.redirect('/home');
         });
     })
@@ -188,10 +188,9 @@ app.post('/login', (req, res) => {
     });
 });
 
-
-
 // -------------------------------------  ROUTES for logout.hbs   ----------------------------------------------
 
+// destroy the login session
 app.get('/logout', (req, res) => {
   req.session.destroy(function(err) {
     res.render('pages/logout');
@@ -207,15 +206,17 @@ app.get('/board', async (req, res) => {
   const logged = req.session && req.session.user;
   if (!logged) return res.redirect('/login');
 
+  // If there is no board ID request
   if (!board_id) {
+    // try to load all the boards that available
     try {
-      const boards = await db.any('SELECT * FROM boards ORDER BY board_id');
+      const boards = await db.any('SELECT * FROM boards ORDER BY board_id'); // pull the boards on DB
       return res.render('pages/board', {
         boards,
         showList: true,
-        logged
+        logged // nessesary for nav.hbs to load correct info
       });
-    } catch (err) {
+    } catch (err) { // if there are none then just load the error message
       return res.status(500).render('pages/board', {
         boards: [],
         error: true,
@@ -226,8 +227,12 @@ app.get('/board', async (req, res) => {
     }
   }
 
+  // Loading the specific board as an extention of /board
   try {
+    // Pull the board_id
     const board = await db.oneOrNone('SELECT name, description FROM boards WHERE board_id = $1 LIMIT 1;', [board_id]);
+
+    // No board then give feedback
     if (!board) {
       return res.status(404).render('pages/board', {
         posts: [],
@@ -238,7 +243,10 @@ app.get('/board', async (req, res) => {
       });
     }
 
+    // if there is board load more of them
     const posts = await db.any('SELECT * FROM posts WHERE board_id = $1 ORDER BY post_id DESC;', [board_id]);
+    
+    // print out rest of the board information
     return res.render('pages/board', {
       title: board.name,
       description: board.description,
@@ -247,7 +255,7 @@ app.get('/board', async (req, res) => {
       showList: false,
       logged
     });
-  } catch (err) {
+  } catch (err) { // Catch unforseen errors
     return res.status(500).render('pages/board', {
       posts: [],
       error: true,
@@ -258,15 +266,12 @@ app.get('/board', async (req, res) => {
   }
 });
 
-
-
-
 app.post('/board', async (req,res) =>{
   // the user should be logged to do anything
   const logged = req.session && req.session.user;
   if (!logged) return res.redirect('/login');
 
-  try {
+  try { // try to post a board with 
     const {board_name, board_description} = req.body;
     const query = `
       INSERT INTO boards 
@@ -279,6 +284,37 @@ app.post('/board', async (req,res) =>{
     console.error('Board Cation failed:', err.message);
     return res.status(500).render('pages/home', {
       message: 'An unexpected error occurred'
+    });
+  }
+});
+
+// -------------------------------------  ROUTES for Board Create page   ----------------------------------------------
+
+// GET: Render board creation form
+app.get('/board_create', (req, res) => {
+  const logged = req.session && req.session.user;
+  if (!logged) return res.redirect('/login');
+
+  res.render('pages/board_create');
+});
+
+// POST: Handle form submission to create a new board
+app.post('/board_create', async (req, res) => {
+  const logged = req.session && req.session.user;
+  if (!logged) return res.redirect('/login');
+
+  try {
+    const { board_name, board_description } = req.body;
+    const query = `
+      INSERT INTO boards (name, description)
+      VALUES ($1, $2) RETURNING *;
+    `;
+    await db.one(query, [board_name, board_description]);
+    res.redirect('/board');
+  } catch (err) {
+    console.error('Board creation failed:', err.message);
+    res.status(500).render('pages/board_create', {
+      message: 'An error occurred: ' + err.message
     });
   }
 });

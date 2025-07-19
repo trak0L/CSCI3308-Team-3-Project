@@ -1,0 +1,21 @@
+<main class="container my-5">
+  <h2>Create New Board</h2>
+
+  <form action="/board_create" method="POST">
+    <div class="mb-3">
+      <label for="board_name" class="form-label">Board Name</label>
+      <input type="text" class="form-control" id="board_name" name="board_name" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="board_description" class="form-label">Board Description</label>
+      <textarea class="form-control" id="board_description" name="board_description" rows="3" required></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Board</button>
+  </form>
+
+  {{#if message}}
+    <div class="alert alert-danger mt-3">{{message}}</div>
+  {{/if}}
+</main>
