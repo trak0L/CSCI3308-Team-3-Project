@@ -45,9 +45,9 @@ CREATE TABLE posts (
   board_id    INT NOT NULL REFERENCES boards(board_id) ON DELETE CASCADE, -- INT NOT NULL: every thread must belong to a board, can’t be empty/REFERENCES boards(board_id): establish a foreign‑key link to the boards table, you can only create threads for boards that actually exist/ON DELETE CASCADE: if someone deletes a board, all its threads are automatically removed-prevents threads pointing at a nonexistent board
   user_id     INT NOT NULL REFERENCES users(user_id)  ON DELETE CASCADE,  -- INT NOT NULL: every thread has an author/REFERENCES users(user_id): links to the users table so you know which user created the thread/ON DELETE CASCADE: if a user is deleted all threads they created are also deleted
   title       VARCHAR(200) NOT NULL,                                      -- subject of the discussion
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  post_description TEXT
 );
-
 
 -- comments
 CREATE TABLE comments (

@@ -15,7 +15,6 @@
     // Authentication Required
     app.use(auth);
 
-
 */
 
 // ----------------------------------   DEPENDENCIES  ----------------------------------------------
@@ -28,6 +27,7 @@ const path = require('path');
 const pgp = require('pg-promise')();
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const { permission } = require('process');
 
 // -------------------------------------  APP CONFIG   ----------------------------------------------
 
@@ -78,21 +78,23 @@ db.connect()
     console.log('ERROR', error.message || error);
   });
 
-// TODO - Include your API routes here
-
 // -------------------------------------  ROUTES for landing page   ----------------------------------------------
 
 app.get('/', (req, res) => {
-  const logged = req.session && req.session.user;
-  res.render('pages/home', { logged });
+  res.redirect('/login');
 });
-
 
 // -------------------------------------  ROUTES for home page   ----------------------------------------------
 
 app.get('/home', (req, res) => {
   const logged = req.session && req.session.user;
-  res.render('pages/home', { logged });
+
+  if (!logged) return res.redirect('/login');
+
+  res.render('pages/home', {
+    username: req.session.user.username,
+    logged
+  });
 });
 
 // -------------------------------------  ROUTES for register.hbs   ----------------------------------------------
@@ -148,7 +150,6 @@ app.post('/register', async (req, res) => {
   }
 });
 
-
 // -------------------------------------  ROUTES for login.hbs   ----------------------------------------------
 
 // Initializers
@@ -196,6 +197,186 @@ app.get('/logout', (req, res) => {
     res.render('pages/logout');
   });
 });
+
+// -------------------------------------  ROUTES for boards page   ----------------------------------------------
+
+app.get('/board', async (req, res) => {
+  const board_id = req.query.board_id;
+
+  // the user should be logged in to view boards or posts
+  const logged = req.session && req.session.user;
+  if (!logged) return res.redirect('/login');
+
+  if (!board_id) {
+    try {
+      const boards = await db.any('SELECT * FROM boards ORDER BY board_id');
+      return res.render('pages/board', {
+        boards,
+        showList: true,
+        logged
+      });
+    } catch (err) {
+      return res.status(500).render('pages/board', {
+        boards: [],
+        error: true,
+        message: 'Failed to load boards: ' + err.message,
+        showList: true,
+        logged
+      });
+    }
+  }
+
+  try {
+    const board = await db.oneOrNone('SELECT name, description FROM boards WHERE board_id = $1 LIMIT 1;', [board_id]);
+    if (!board) {
+      return res.status(404).render('pages/board', {
+        posts: [],
+        error: true,
+        message: 'Board not found',
+        showList: false,
+        logged
+      });
+    }
+
+    const posts = await db.any('SELECT * FROM posts WHERE board_id = $1 ORDER BY post_id DESC;', [board_id]);
+    return res.render('pages/board', {
+      title: board.name,
+      description: board.description,
+      board_id,
+      posts,
+      showList: false,
+      logged
+    });
+  } catch (err) {
+    return res.status(500).render('pages/board', {
+      posts: [],
+      error: true,
+      message: 'Unexpected error: ' + err.message,
+      showList: false,
+      logged
+    });
+  }
+});
+
+
+
+
+app.post('/board', async (req,res) =>{
+  // the user should be logged to do anything
+  const logged = req.session && req.session.user;
+  if (!logged) return res.redirect('/login');
+
+  try {
+    const {board_name, board_description} = req.body;
+    const query = `
+      INSERT INTO boards 
+      (name, description) 
+      VALUES ($1, $2) RETURNING *;`;
+    
+    const newBoard = await db.one(query, [board_name, board_description]);
+    res.redirect('/home');}
+  catch (err) {
+    console.error('Board Cation failed:', err.message);
+    return res.status(500).render('pages/home', {
+      message: 'An unexpected error occurred'
+    });
+  }
+});
+
+// -------------------------------------  ROUTES for posts page   ----------------------------------------------
+
+const post_comments = `
+  SELECT
+  *    
+  FROM
+  comments
+  WHERE
+  post_id = $1
+  ORDER BY comment_id DESC;`;
+
+  
+
+app.get('/posts', (req, res) => {
+  // the user should be logged to do anything
+  const logged = req.session && req.session.user;
+  if (!logged) return res.redirect('/login');
+
+  const post_id = req.query.post_id;
+  db.one('SELECT title FROM posts WHERE post_id = $1 LIMIT 1;', [post_id]).then(post=>{
+  db.any(post_comments, [post_id])
+    .then(comments =>{
+      console.log(comments);
+      res.render('pages/posts', {
+        title: post.title,
+        comments
+      });
+    })
+    .catch(err => {
+      res.render('pages/posts', {
+        posts: [],
+        error: true,
+        message: err.message,
+      });
+    });
+  });
+});
+
+app.post('/board', async (req,res) =>{
+  // the user should be logged to do anything
+  const logged = req.session && req.session.user;
+  if (!logged) return res.redirect('/login');
+
+  try {
+  const {post_title, user_id, board_id} = req.body;
+  const query = `
+  INSERT INTO posts 
+  (board_id, user_id, post_title) 
+  VALUES ($1, $2, $3) RETURNING *;`;
+  const newBoard = await db.one(query, [board_id, user_id, post_title]);
+  res.redirect('/home');}
+  catch (err) {
+    console.error('Board Cation failed:', err.message);
+    return res.status(500).render('pages/home', {
+      message: 'An unexpected error occurred'
+    });
+  }
+});
+
+app.post('/post/create', async (req, res) => {
+  // the user should be logged to do anything
+  const logged = req.session && req.session.user;
+  if (!logged) return res.redirect('/login');
+
+  const { board_id, title, body } = req.body;
+  const user_id = user.user_id;
+
+  if (!title || !board_id) {
+    return res.status(400).render('pages/posts', {
+      error: true,
+      message: 'Post title and board are required.',
+      showForm: true,
+      board_id
+    });
+  }
+
+  try {
+    const query = `
+      INSERT INTO posts (board_id, user_id, title, body)
+      VALUES ($1, $2, $3, $4) RETURNING *;
+    `;
+    const newPost = await db.one(query, [board_id, user_id, title, body]);
+    res.redirect(`/board?board_id=${board_id}`);
+  } catch (err) {
+    console.error('Post creation failed:', err.message);
+    return res.status(500).render('pages/posts', {
+      error: true,
+      message: 'An unexpected error occurred: ' + err.message,
+      showForm: true,
+      board_id
+    });
+  }
+});
+
 
 // -------------------------------------  START THE SERVER   ----------------------------------------------
 

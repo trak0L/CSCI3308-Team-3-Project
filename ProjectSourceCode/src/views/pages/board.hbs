@@ -1,0 +1,46 @@
+<main class="container my-4">
+
+  {{!-- Show all boards --}}
+  {{#if showList}}
+    <h2>Available Boards</h2>
+    <div class="list-group mb-4">
+      {{#each boards}}
+        <a href="/board?board_id={{board_id}}" class="list-group-item list-group-item-action">
+          <h5 class="mb-1">{{name}}</h5>
+          <p class="mb-1 text-muted">{{description}}</p>
+        </a>
+      {{/each}}
+
+      {{#unless boards.length}}
+        <div class="list-group-item text-muted">No boards created yet.</div>
+      {{/unless}}
+    </div>
+  {{/if}}
+
+  {{!-- Show posts within a specific board --}}
+  {{#if title}}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>{{title}}</h2>
+      <a href="/posts/create?board_id={{board_id}}" class="btn btn-primary">+ Create Post</a>
+    </div>
+    <p class="text-muted">{{description}}</p>
+
+    <div class="list-group">
+      {{#each posts}}
+        <a href="/posts?post_id={{post_id}}" class="list-group-item list-group-item-action">
+          <h5 class="mb-1">{{title}}</h5>
+          <p class="mb-1 text-muted">Posted: {{created_at}}</p>
+        </a>
+      {{/each}}
+
+      {{#unless posts.length}}
+        <div class="list-group-item text-muted">No posts created yet.</div>
+      {{/unless}}
+    </div>
+  {{/if}}
+
+  {{#if error}}
+    <div class="alert alert-danger mt-3">{{message}}</div>
+  {{/if}}
+
+</main>
