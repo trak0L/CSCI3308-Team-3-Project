@@ -290,19 +290,19 @@ app.post('/board', async (req,res) =>{
 
 // -------------------------------------  ROUTES for Board Create page   ----------------------------------------------
 
-// GET: Render board creation form
+// Load the board_create
 app.get('/board_create', (req, res) => {
   const logged = req.session && req.session.user;
   if (!logged) return res.redirect('/login');
-
   res.render('pages/board_create');
 });
 
-// POST: Handle form submission to create a new board
+// Adding to boards DB
 app.post('/board_create', async (req, res) => {
   const logged = req.session && req.session.user;
   if (!logged) return res.redirect('/login');
 
+  // From the form get the info and insert
   try {
     const { board_name, board_description } = req.body;
     const query = `
@@ -310,7 +310,10 @@ app.post('/board_create', async (req, res) => {
       VALUES ($1, $2) RETURNING *;
     `;
     await db.one(query, [board_name, board_description]);
-    res.redirect('/board');
+    // if it adds correct then should bring to homepage
+    // TODO: maybe could redirect to that new board 
+    // so you can make a post on there
+    res.redirect('/board'); 
   } catch (err) {
     console.error('Board creation failed:', err.message);
     res.status(500).render('pages/board_create', {
@@ -330,13 +333,12 @@ const post_comments = `
   post_id = $1
   ORDER BY comment_id DESC;`;
 
-  
-
 app.get('/posts', (req, res) => {
   // the user should be logged to do anything
   const logged = req.session && req.session.user;
   if (!logged) return res.redirect('/login');
 
+  // for the post ID load the comments for that post
   const post_id = req.query.post_id;
   db.one('SELECT title FROM posts WHERE post_id = $1 LIMIT 1;', [post_id]).then(post=>{
   db.any(post_comments, [post_id])
@@ -357,61 +359,43 @@ app.get('/posts', (req, res) => {
   });
 });
 
-app.post('/board', async (req,res) =>{
-  // the user should be logged to do anything
+// Load the create post for the right board_id
+app.get('/post_create', (req, res) => {
   const logged = req.session && req.session.user;
   if (!logged) return res.redirect('/login');
 
-  try {
-  const {post_title, user_id, board_id} = req.body;
-  const query = `
-  INSERT INTO posts 
-  (board_id, user_id, post_title) 
-  VALUES ($1, $2, $3) RETURNING *;`;
-  const newBoard = await db.one(query, [board_id, user_id, post_title]);
-  res.redirect('/home');}
-  catch (err) {
-    console.error('Board Cation failed:', err.message);
-    return res.status(500).render('pages/home', {
-      message: 'An unexpected error occurred'
-    });
-  }
+  const board_id = req.query.board_id;
+  res.render('pages/post_create', { board_id }); 
 });
 
-app.post('/post/create', async (req, res) => {
-  // the user should be logged to do anything
+// Uploading the post to DB
+app.post('/posts_create', async (req, res) => {
   const logged = req.session && req.session.user;
   if (!logged) return res.redirect('/login');
 
-  const { board_id, title, body } = req.body;
-  const user_id = user.user_id;
+  try { // Try to make the post with given info
+    const user_id = req.session.user.user_id;
+    const { board_id, title, description } = req.body;
 
-  if (!title || !board_id) {
-    return res.status(400).render('pages/posts', {
-      error: true,
-      message: 'Post title and board are required.',
-      showForm: true,
-      board_id
-    });
-  }
-
-  try {
     const query = `
-      INSERT INTO posts (board_id, user_id, title, body)
-      VALUES ($1, $2, $3, $4) RETURNING *;
+      INSERT INTO posts (board_id, user_id, title, created_at)
+      VALUES ($1, $2, $3, DEFAULT)
+      RETURNING post_id;
     `;
-    const newPost = await db.one(query, [board_id, user_id, title, body]);
-    res.redirect(`/board?board_id=${board_id}`);
-  } catch (err) {
+
+    await db.one(query, [board_id, user_id, title]);
+    // redirect to the board the post exists on
+    res.redirect(`/board?board_id=${board_id}`); 
+
+  } catch (err) { // catch any errors
     console.error('Post creation failed:', err.message);
-    return res.status(500).render('pages/posts', {
-      error: true,
-      message: 'An unexpected error occurred: ' + err.message,
-      showForm: true,
-      board_id
+    res.status(500).render('pages/post_create', {
+      board_id,
+      message: 'An error occurred: ' + err.message
     });
   }
 });
+
 
 
 // -------------------------------------  START THE SERVER   ----------------------------------------------
