@@ -1,0 +1,33 @@
+<main>
+  <div class="container d-flex justify-content-left align-items-left">
+    <div class="list-group list-group-flush">
+      <div class="list-group-item">
+        <h1>{{title}}</h1>
+      </div>
+    {{#each comments}}
+          <div class="media list-group-item">
+            <div class="media-left media-top">
+              <img src={{icon_url}} class="media-object img-circle" style="width:50px">
+            </div>
+            <div class="media-body">
+              <h4 class="media-heading">{{username}}</h4>
+              <p>{{body}}</p>
+              <p>Posted: {{created_at}}</p>
+            </div>
+          </div>
+    {{/each}}
+    <div class="list-group-item">
+        <form method="POST" action="/comment" class="w-100" style="max-width: 400px;">
+          <h3 class="mb-3 text-left">New Comment</h3>
+          <div class="mb-3">
+            <textarea type="text" class="form-control" name="comment_body" placeholder="Write Your Comment!" required ></textarea>
+          </div>
+          <div class="mb-3">
+            <input type="hidden" class="form-control" name="post_id" value={{post_id}} />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Add Comment</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>

@@ -19,13 +19,13 @@
           </li>
         </ul>
 
-        <!-- Conditional Login/Logout/Posts -->
-        <ul class="navbar-nav">
+        <!-- Conditional Login/Logout/Settings -->
+        <ul class="navbar-nav me-auto">
           {{#if logged}}
-            <li class="nav-item me-2">
-              <a class="nav-link" href="/posts">Posts</a>
-            </li>
             <li class="nav-item me-1">
+              <a class="nav-link" href="/settings">Settings</a>
+            </li>
+            <li class="nav-item me-2">
               <a class="nav-link" href="/logout">Logout</a>
             </li>
           {{else}}

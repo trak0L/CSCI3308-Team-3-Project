@@ -27,7 +27,7 @@ CREATE TABLE users (
   username      VARCHAR(100) NOT NULL UNIQUE, -- NOT NULL: every user must have a username/UNIQUE: no users can have same username
   email         VARCHAR(100) NOT NULL UNIQUE, -- every user must have email/no emails can be the same
   password_hash VARCHAR(128) NOT NULL,        -- user must have passwordhash
-  icon_url      VARCHAR(255),
+  icon_url      TEXT DEFAULT 'https://wallpapers.com/images/hd/generic-person-icon-profile-ulmsmhnz0kqafcqn-2.jpg',
   privilege     VARCHAR(50)  NOT NULL DEFAULT 'user', -- DEFAULT new accounts automatically start with standard “user” role
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now()    -- automate account creation time stamp
 );
