@@ -22,3 +22,4 @@ export async function createUser({ username, email, password_hash }) {
   );
   return rows[0];
 }
+
