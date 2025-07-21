@@ -39,22 +39,22 @@ Docker Compose
 
 (Optional) Node.js & npm if running locally without Docker
 
-Clone the repository
-git clone git@github.com:YourUsername/CSCI3308-Team-3-Project.git
+### Clone the repository
+git clone git@github.com:yourUsername/CSCI3308-Team-3-Project.git
 cd CSCI3308-Team-3-Project/ProjectSourceCode
 
 Create your .env file
 
-Copy the example and fill in your secrets:
+### Copy the example and fill in your secrets:
 cp .env.example .env
-# Edit .env to add your values:
-# POSTGRES_USER=message_user
-# POSTGRES_PASSWORD=supersecretpassword
-# POSTGRES_DB=messageboard
-# POSTGRES_HOST=db
-# SESSION_SECRET=yourSessionSecret
+ Edit .env to add your values:
+ POSTGRES_USER=message_user
+ POSTGRES_PASSWORD=supersecretpassword
+ POSTGRES_DB=messageboard
+ POSTGRES_HOST=db
+ SESSION_SECRET=yourSessionSecret
 
-Run with Docker Compose
+### Run with Docker Compose
 
 Bring up the app & database in detached mode:
 docker-compose up -d --build
@@ -63,13 +63,13 @@ The Postgres container will initialize the schema and seed data from
 src/init_data/*.sql
 The web container builds and starts the Express server on port 3000.
 
-Access the app
+### Access the app
 
 Open your browser to:
 http://localhost:3000
 
 
-Run Integration Tests
+### Run Integration Tests
 
 Execute the Mocha suite inside the web container:
 docker-compose exec web npm test
