@@ -1,9 +1,9 @@
-CSCI 3308 Message Board Project
+# CSCI 3308 Message Board Project
 
-Welcome to Team 3's Message Board application: a fully Dockerized, Node.js + Express + PostgreSQL + Handlebars forum that lets users register, log in, create boards, start discussion posts, and leave comments
+### Welcome to Team 3's Message Board application: a fully Dockerized, Node.js + Express + PostgreSQL + Handlebars forum that lets users register, log in, create boards, start discussion posts, and leave comments
 
 
-Features
+## Features
 
 User Authentication: Register & log in with hashed passwords (bcrypt) and session management (express-session)
 
@@ -14,7 +14,7 @@ Dockerized: Runs in Docker containers for the app, database (Postgres), and opti
 Integration Tests: End-to-end smoke tests using Mocha, Chai & Supertest
 
 
-Technology Stack
+## Technology Stack
 
 Node.js & Express for the server.
 
@@ -31,7 +31,7 @@ bcrypt for password hashing.
 Mocha, Chai, Supertest for integration testing.
 
 
- Prerequisites
+### Prerequisites
 
 Docker
 
@@ -74,7 +74,7 @@ Run Integration Tests
 Execute the Mocha suite inside the web container:
 docker-compose exec web npm test
 
-Directory Structure
+## Directory Structure
 
 ProjectSourceCode/
 ├─ .env.example       # Example env variables
