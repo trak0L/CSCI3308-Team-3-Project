@@ -81,8 +81,9 @@ http://localhost:3000
 ### Run Integration Tests
 
 Execute the Mocha suite inside the web container:
+```
 docker-compose exec web npm test
-
+```
 ## Directory Structure
 
 ```
