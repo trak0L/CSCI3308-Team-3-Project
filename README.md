@@ -97,9 +97,6 @@ ProjectSourceCode/
 ├─ src/
 │   ├─ index.js       # App entry point, HTTP handlers, Business logic, Express routers (auth, boards, posts, comments)
 │   ├─ db.js          # Postgres connection pool
-│   //├─ routes/        # Express routers (auth, boards, posts, comments)
-│   //├─ controllers/   # HTTP handlers
-│   //├─ services/      # Business logic
 │   ├─ models/        # Raw SQL queries
 │   └─ views/         # Handlebars templates & public assets
 └─ test/
