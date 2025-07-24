@@ -1,37 +1,54 @@
 const { expect } = require('chai');
+const { createUser } = require('../src/models/userModel.js');
+const { createBoard } = require('../src/models/boardModel.js');
+const { createPost } = require('../src/models/postModel.js');
+const db = require('../src/db.js');
 
-describe('Integration Test: User creates a post', () => {
+describe('Integration Test: User creates a post on a board', function () {
+  this.timeout(10000);
 
-  it('should create a user and then a post for that user', () => {
-    
-    // mock user creation
-    function createUser(username, password) {
-      return {
-        userId: 1,
-        username,
-        password: `hashed(${password})`
-      };
-    }
+  let testUser, testBoard, testPost;
 
-    // mock post creation
-    function createPost(userId, boardId, title, content) {
-      return {
-        userId,
-        boardId,
-        title,
-        content,
-        // createdAt: new Date().toISOString()
-      };
-    }
+  it('should create a user, board, and a post connecting them', async () => {
 
-    // simulate workflow
-    const user = createUser('faris', 'secure123');
-    const post = createPost(user.userId, 1, 'Integration Test Post', 'This post was made by Faris.');
+    // Step 1: Create user
+    testUser = await createUser({
+      username: 'integration_user',
+      email: 'integration_user@example.com',
+      password_hash: 'integration_hash'
+    });
 
-    // test connections
-    expect(user.username).to.equal('faris');
-    expect(post.userId).to.equal(user.userId);
-    expect(post.title).to.equal('Integration Test Post');
+    // Step 2: Create board
+    testBoard = await createBoard({
+      name: 'Integration Test Board',
+      description: 'Board created for integration test'
+    });
+
+    // Step 3: Create post
+    testPost = await createPost({
+      user_id: testUser.user_id,
+      board_id: testBoard.board_id,
+      title: 'Integration Test Post'
+    });
+
+    // Step 4: Validate relationships
+    expect(testPost).to.have.property('post_id');
+    expect(testPost.user_id).to.equal(testUser.user_id);
+    expect(testPost.board_id).to.equal(testBoard.board_id);
+    expect(testPost.title).to.equal('Integration Test Post');
+
   });
 
+  after(async () => {
+    if (testPost) {
+      await db.query('DELETE FROM posts WHERE post_id = $1', [testPost.post_id]);
+    }
+    if (testBoard) {
+      await db.query('DELETE FROM boards WHERE board_id = $1', [testBoard.board_id]);
+    }
+    if (testUser) {
+      await db.query('DELETE FROM users WHERE user_id = $1', [testUser.user_id]);
+    }
+  });
+  
 });
