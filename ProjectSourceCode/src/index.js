@@ -60,6 +60,9 @@ if (process.env.DATABASE_URL) {
     password: process.env.POSTGRES_PASSWORD,
   });
 }
+console.log('[DEBUG] DATABASE_URL:', process.env.DATABASE_URL);
+
+
 // db test
 db.connect()
   .then(obj => {
