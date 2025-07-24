@@ -103,6 +103,6 @@ ProjectSourceCode/
     └─ integration/   # End-to-end tests (Mocha/Chai/Supertest)
 ```
 
-contributors:
+## Contributors:
 
 Made by Team 3 for CSCI 3308
