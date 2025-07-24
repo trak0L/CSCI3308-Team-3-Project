@@ -9,9 +9,9 @@ User Authentication: Register & log in with hashed passwords (bcrypt) and sessio
 
 Boards & Posts: Create categorized boards, start new discussion posts, and comment on posts
 
-Dockerized: Runs in Docker containers for the app, database (Postgres), and optional Redis (for session store or caching)
+Dockerized: Runs in Docker containers for the app, database (Postgres), and session management 
 
-Integration Tests: End-to-end smoke tests using Mocha, Chai & Supertest
+Unit and Integration Tests: Individual and end-to-end smoke tests using Mocha, Chai & Supertest
 
 
 ## Technology Stack
@@ -24,7 +24,7 @@ Handlebars for server-rendered views.
 
 Docker Compose to orchestrate services.
 
-pg.Pool for database connection pooling.
+pg.Pool and pg.connecct for database connection pooling.
 
 bcrypt for password hashing.
 
