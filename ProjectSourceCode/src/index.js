@@ -7,7 +7,11 @@ const app = express();
 const handlebars = require('express-handlebars');
 const Handlebars = require('handlebars');
 const path = require('path');
+require('dotenv').config();
 const pgp = require('pg-promise')();
+
+const db = pgp(process.env.DATABASE_URL);
+
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const { permission } = require('process');
