@@ -10,7 +10,7 @@ const path = require('path');
 require('dotenv').config();
 const pgp = require('pg-promise')();
 
-const db = pgp(process.env.DATABASE_URL);
+//const db = pgp(process.env.DATABASE_URL);
 
 const bodyParser = require('body-parser');
 const session = require('express-session');
@@ -45,15 +45,21 @@ app.use(
 );
 
 // -------------------------------------  DB CONFIG AND CONNECT   ---------------------------------------
-const dbConfig = {
-  host: 'db',
-  port: 5432,
-  database: process.env.POSTGRES_DB,
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-};
-const db = pgp(dbConfig);
+let db;
 
+if (process.env.DATABASE_URL) {
+  // Use DATABASE_URL on Render
+  db = pgp(process.env.DATABASE_URL);
+} else {
+  // Local development
+  db = pgp({
+    host: process.env.POSTGRES_HOST || 'localhost',
+    port: 5432,
+    database: process.env.POSTGRES_DB,
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+  });
+}
 // db test
 db.connect()
   .then(obj => {
@@ -354,5 +360,8 @@ app.post('/comment', async (req,res) =>{
 
 // -------------------------------------  START THE SERVER   ----------------------------------------------
 
-app.listen(3000);
-console.log('Server is listening on port 3000');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is listening on port ${PORT}`);
+});
+
